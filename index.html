@@ -1,24 +1,11 @@
 <!DOCTYPE html>
 <!--
-  ============================================================================
-  PERSONAL PORTFOLIO — "Emerging from Shadow" theme
-  ============================================================================
-  HOW TO USE THIS FILE
-  1. Search for the word "FILL IN" (Ctrl/Cmd+F) — every spot you need to
-     edit is marked with a comment like the one around this block.
-  2. Replace placeholder text directly. Replace placeholder images by
-     setting the empty src="" attributes to a real file path or URL,
-     e.g. src="images/profile.jpg".
-  3. To publish on GitHub Pages: create a repo, add this file as
-     index.html, push it, then enable Pages in the repo Settings.
-  ============================================================================
 -->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- FILL IN: update the page title and description with your name -->
 <title>Akhylle Rei R. Toledo</title>
 <meta name="description" content="Portfolio of Your Name">
 
@@ -387,7 +374,7 @@
 <!-- ============================== NAVIGATION ============================== -->
 <header class="nav">
   <div class="nav-inner">
-    <!-- FILL IN: your initials or short name for the top-left nav mark -->
+
     <a href="#top" class="nav-name">Akhylle</a>
     <nav class="nav-links">
       <a href="#about">About</a>
@@ -404,17 +391,12 @@
   <section class="hero" id="top">
     <p class="eyebrow">Portfolio</p>
 
-    <!-- ==================================================== -->
-    <!-- FILL IN: replace "Your Name" with your full name      -->
-    <!-- ==================================================== -->
     <h1 class="hero-name">Akhylle Rei Resurreccion Toledo</h1>
 
-    <!-- FILL IN: your role or title, e.g. "Graphic Designer" or "Frontend Developer" -->
     <p class="hero-role">Aspiring Software Engineer</p>
 
     <div class="photo-frame">
-      <!-- FILL IN: set src to your photo's path, e.g. src="images/profile.jpg" -->
-      <img id="profile-photo" data-slot="photo" src="images/me.jpg" alt="Akhylle">
+      <img id="profile-photo" data-slot="me" src="me.jpg" alt="Akhylle">
       <div class="photo-placeholder">
         <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
           <circle cx="12" cy="8" r="4"></circle>
@@ -430,10 +412,6 @@
     <p class="eyebrow">01 — About</p>
     <h2 class="section-title">Bio</h2>
     <p class="bio-text">
-      <!-- ============================================================ -->
-      <!-- FILL IN: write 2–4 sentences about who you are, what you do, -->
-      <!-- and what drives your work                                    -->
-      <!-- ============================================================ -->
       I'm Akhylle Rei Resurreccion Toledo, a 20-year-old aspiring software engineer. 
       My interest in tech traces back to elementary school, when I spent hours writing JASS 
       scripts in the Warcraft III World Editor — tinkering with unit behaviors, abilities, 
@@ -450,11 +428,6 @@
     <p class="eyebrow">02 — Skills</p>
     <h2 class="section-title">What I work with</h2>
     <ul class="skills-grid">
-      <!-- ==================================================== -->
-      <!-- FILL IN: replace each "Skill" with a real skill name. -->
-      <!-- Copy/paste the <li> line to add more, or delete lines -->
-      <!-- to remove.                                             -->
-      <!-- ==================================================== -->
       <li class="skill-chip">Java</li>
       <li class="skill-chip">Python</li>
       <li class="skill-chip">Photoshop</li>
@@ -472,13 +445,10 @@
     <h2 class="section-title">Selected Work</h2>
     <div class="work-grid">
 
-      <!-- ==================================================== -->
-      <!-- FILL IN: project 1 — image, title, description, link -->
-      <!-- Copy this whole <article> block to add more projects  -->
-      <!-- ==================================================== -->
+
       <article class="project-card">
         <div class="project-image">
-          <img data-slot="project" src="demonqueen.jpg" alt="The Demon Queen RPG">
+          <img data-slot="demonqueen" src="demonqueen.jpg" alt="The Demon Queen RPG">
           <div class="project-placeholder">
             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
               <rect x="3" y="4" width="18" height="16" rx="1"></rect>
@@ -502,7 +472,7 @@
         </div>
       </article>
 
-      <!-- FILL IN: project 2 -->
+
       <article class="project-card">
         <div class="project-image">
           <img data-slot="amelia" src="amelia.jpg" alt="Amelia Platformer">
@@ -526,8 +496,7 @@
           <a href="#" class="project-link">View project →</a>
         </div>
       </article>
-
-      <!-- FILL IN: project 3 -->
+      
       <article class="project-card">
         <div class="project-image">
           <img data-slot="worldedit" src="" alt="World Edit">
@@ -556,10 +525,8 @@
   <section class="contact" id="contact">
     <p class="eyebrow">04 — Contact</p>
     <h2 class="section-title">Get in touch</h2>
-    <!-- FILL IN: your contact blurb -->
     <p class="contact-text">Interested in working together, or just want to say hi? Reach out.</p>
     <div class="contact-links">
-      <!-- FILL IN: replace with your real email and profile links -->
       <a href="mailto:arrtoledo@pcu.edu.ph">Email</a>
       <a href="#">LinkedIn</a>
       <a href="#">GitHub</a>
@@ -568,7 +535,7 @@
 
 </main>
 
-<!-- FILL IN: update the name/year in the footer -->
+
 <footer class="footer">
   <p>© 2026 Akhylle Toledo</p>
 </footer>
@@ -585,9 +552,9 @@
     spotlight.style.opacity = '0';
   });
 
-  // Hide empty image slots so the placeholder graphic shows through
-  // instead of a broken-image icon. Once you set a real src, this
-  // automatically stops applying.
+  //
+  // 
+  // 
   document.querySelectorAll('img[data-slot]').forEach(function (img) {
     var src = img.getAttribute('src');
     if (!src || src.trim() === '') {
