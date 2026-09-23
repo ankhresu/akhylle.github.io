@@ -112,10 +112,19 @@
     min-width: 0;
   }
 
-  /* ---------- ADDED (step 1): search bar UI. Not wired up yet — */
-  /* the "from:Section" keyword filtering + highlighting is a later step. */
+  /* ---------- ADDED (step 1): search bar UI. */
+  /* ADDED (step 4): now wired up — "from:section" filtering, live results and */
+  /* highlighting are handled by the search script near the end of the file. */
   /* CHANGED (step 2): width is now flexible instead of a fixed 150px, so it */
   /* shares space with the icon nav cleanly instead of forcing a wrap. */
+  /* CHANGED (step 4): sizing moved onto .nav-search-wrap (below) so the results */
+  /* dropdown has a stable, position:relative anchor to sit under. */
+  .nav-search-wrap{
+    position: relative;
+    flex: 1 1 auto;
+    min-width: 44px;
+    max-width: 230px;
+  }
   .nav-search{
     display: flex;
     align-items: center;
@@ -125,9 +134,7 @@
     border-radius: 999px;
     background: var(--surface);
     transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    flex: 1 1 auto;
-    min-width: 44px;
-    max-width: 230px;
+    width: 100%;
   }
   .nav-search:focus-within{
     border-color: var(--accent);
@@ -148,6 +155,112 @@
     min-width: 0;
   }
   .nav-search-input::placeholder{ color: var(--text-faint); }
+
+  /* ---------- ADDED (step 4): search results dropdown ---------- */
+  .search-results{
+    position: absolute;
+    top: calc(100% + 10px);
+    left: 0;
+    width: min(360px, calc(100vw - 2.4rem));
+    max-height: min(70vh, 420px);
+    overflow-y: auto;
+    background: var(--surface-raised);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.85);
+    padding: 0.5rem;
+    display: none;
+    z-index: 5;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .search-results.open{ display: block; }
+  .search-results::-webkit-scrollbar{ width: 6px; }
+  .search-results::-webkit-scrollbar-track{ background: transparent; }
+  .search-results::-webkit-scrollbar-thumb{ background: var(--border); border-radius: 999px; }
+
+  .search-hint-label{
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-faint);
+    padding: 0.4rem 0.5rem 0.6rem;
+  }
+  .search-hint-chips{
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    padding: 0 0.3rem 0.3rem;
+  }
+  .search-chip{
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    padding: 0.32rem 0.65rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.25s ease;
+  }
+  .search-chip:hover{ border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
+
+  .search-result-item{
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.55rem 0.55rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+  .search-result-item:hover,
+  .search-result-item.active{ background: var(--accent-dim); }
+  .search-result-badge{
+    flex-shrink: 0;
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.2rem 0.5rem;
+    margin-top: 0.1rem;
+    white-space: nowrap;
+  }
+  .search-result-main{
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    min-width: 0;
+  }
+  .search-result-title{
+    font-size: 0.85rem;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .search-result-snippet{
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .search-empty{
+    padding: 0.9rem 0.6rem;
+    font-size: 0.78rem;
+    color: var(--text-faint);
+    line-height: 1.6;
+  }
+  .search-filter-suggestion .search-result-badge{ color: var(--text-dim); }
+
+  /* the glow that flashes on whatever a search result points to, so it's obvious what matched */
+  @keyframes search-flash{
+    0%{ box-shadow: 0 0 0 3px var(--accent-glow), 0 0 46px -6px var(--accent-glow); }
+    100%{ box-shadow: 0 0 0 0 rgba(201,162,75,0), 0 0 0 0 rgba(201,162,75,0); }
+  }
+  .search-highlight{ animation: search-flash 1.8s ease-out; }
 
   /* ---------- CHANGED (step 2): nav-links rebuilt as compact icon buttons ---------- */
   /* (was a row of uppercase text labels — "Academic Works" / "Personal Projects" */
@@ -649,7 +762,9 @@
     /* so name + search + icons no longer need to wrap onto separate lines. */
     .nav-inner{ padding: 1rem 1.1rem; gap: 0.6rem; }
     .nav-left{ gap: 0.6rem; }
-    .nav-search{ min-width: 36px; padding: 0.42rem 0.7rem; }
+    .nav-search-wrap{ min-width: 36px; }
+    .nav-search{ padding: 0.42rem 0.7rem; }
+    .search-results{ left: -0.6rem; width: calc(100vw - 2.2rem); }
     .nav-links{ gap: 0.2rem; }
     .nav-links a{ width: 34px; height: 34px; }
     .nav-links a svg{ width: 17px; height: 17px; }
@@ -680,13 +795,18 @@
     <div class="nav-left">
       <a href="#home" data-page="home" class="nav-name">Akhylle</a>
 
-      <!-- ADDED (step 1): search bar UI only — filtering logic comes in a later step -->
-      <div class="nav-search">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <circle cx="11" cy="11" r="7"></circle>
-          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-        </svg>
-        <input type="text" class="nav-search-input" id="site-search" placeholder="Search...">
+      <!-- ADDED (step 1): search bar UI. ADDED (step 4): wired up to script/search.js -->
+      <!-- (bottom of page) — type to search the whole site, or "from:section" -->
+      <!-- (e.g. from:academic, from:projects) to filter to just that part of it. -->
+      <div class="nav-search-wrap">
+        <div class="nav-search">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="7"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" class="nav-search-input" id="site-search" placeholder="Search..." autocomplete="off" aria-label="Search the site" aria-expanded="false" role="combobox">
+        </div>
+        <div class="search-results" id="search-results" role="listbox" aria-label="Search results"></div>
       </div>
     </div>
 
@@ -1339,6 +1459,415 @@
     });
   }
   hideEmptyImages();
+
+  // ================= ADDED (step 4): site-wide search =================
+  // Builds a lightweight index from every section/page — including the whole
+  // Academic Works data model, not just whatever pill is currently selected —
+  // then lets the nav search box filter it live, Discord-style: typing
+  // "from:section" (e.g. "from:academic", "from:projects") narrows results to
+  // just that part of the site before matching the rest of what's typed.
+  // To make a new spot searchable, add another entry inside buildSearchIndex().
+
+  var SECTION_ALIASES = {
+    home: ['home'],
+    about: ['about', 'bio'],
+    achievements: ['achievements', 'achievement', 'awards', 'award'],
+    skills: ['skills', 'skill'],
+    contact: ['contact'],
+    academic: ['academic', 'academics', 'academicworks', 'school'],
+    projects: ['projects', 'project', 'personal', 'personalprojects'],
+    play: ['play', 'games', 'game']
+  };
+  var SECTION_LABELS = {
+    home: 'Home', about: 'About', achievements: 'Achievements', skills: 'Skills',
+    contact: 'Contact', academic: 'Academic Works', projects: 'Personal Projects', play: 'Play'
+  };
+  // order they're offered in hints/suggestions — most likely-to-be-searched first
+  var SECTION_ORDER = ['academic', 'projects', 'about', 'skills', 'achievements', 'contact', 'play', 'home'];
+
+  function resolveSection(token) {
+    if (!token) return null;
+    var t = token.toLowerCase().replace(/[\s_-]/g, '');
+    if (!t) return null;
+    var key;
+    for (key in SECTION_ALIASES) {
+      if (SECTION_ALIASES[key].indexOf(t) !== -1) return key;
+    }
+    // fall back to a startsWith match so "from:aca" still resolves once a space is typed
+    for (key in SECTION_ALIASES) {
+      var aliases = SECTION_ALIASES[key];
+      for (var i = 0; i < aliases.length; i++) {
+        if (t.length >= 2 && aliases[i].indexOf(t) === 0) return key;
+      }
+    }
+    return null;
+  }
+
+  function buildSearchIndex() {
+    var idx = [];
+
+    var aboutEl = document.getElementById('about');
+    if (aboutEl) {
+      var bio = aboutEl.querySelector('.bio-text');
+      idx.push({
+        section: 'about', sectionLabel: 'About', page: 'home',
+        title: 'Bio', text: bio ? bio.textContent.trim() : '',
+        highlight: aboutEl
+      });
+    }
+
+    var achEl = document.getElementById('achievements');
+    if (achEl) {
+      var note = achEl.querySelector('.section-note');
+      idx.push({
+        section: 'achievements', sectionLabel: 'Achievements', page: 'home',
+        title: 'Achievements', text: note ? note.textContent.trim() : '',
+        highlight: achEl
+      });
+    }
+
+    // one entry per chip, so e.g. searching "java" jumps straight to that chip
+    document.querySelectorAll('#skills .skill-chip').forEach(function (chip) {
+      var label = chip.textContent.trim();
+      idx.push({
+        section: 'skills', sectionLabel: 'Skills', page: 'home',
+        title: label, text: label,
+        highlight: chip
+      });
+    });
+
+    var contactEl = document.getElementById('contact');
+    if (contactEl) {
+      var ctext = contactEl.querySelector('.contact-text');
+      idx.push({
+        section: 'contact', sectionLabel: 'Contact', page: 'home',
+        title: 'Contact', text: (ctext ? ctext.textContent.trim() : '') + ' Email LinkedIn GitHub',
+        highlight: contactEl
+      });
+    }
+
+    document.querySelectorAll('#personal-projects .project-card').forEach(function (card) {
+      var h3 = card.querySelector('h3');
+      var p = card.querySelector('p');
+      idx.push({
+        section: 'projects', sectionLabel: 'Personal Projects', page: 'projects',
+        title: h3 ? h3.textContent.trim() : 'Project', text: p ? p.textContent.trim() : '',
+        highlight: card
+      });
+    });
+
+    var playEl = document.getElementById('play');
+    if (playEl) {
+      idx.push({
+        section: 'play', sectionLabel: 'Play', page: 'play',
+        title: 'Play', text: 'Playable games coming soon',
+        highlight: playEl
+      });
+    }
+
+    // Academic Works is read straight from the data model (not the DOM), so every
+    // year/subject/work is searchable even while a different pill is selected.
+    ACADEMIC_YEAR_ORDER.forEach(function (yearId) {
+      var year = ACADEMIC_YEARS[yearId];
+      year.subjects.forEach(function (subject) {
+        idx.push({
+          section: 'academic', sectionLabel: 'Academic Works', page: 'academic',
+          title: subject.name, text: year.label + ' ' + subject.name,
+          year: yearId, subjectId: subject.id
+        });
+        WORK_TYPES.forEach(function (type) {
+          var works = subject.works[type];
+          if (!works) return;
+          works.forEach(function (work) {
+            idx.push({
+              section: 'academic', sectionLabel: 'Academic Works', page: 'academic',
+              title: work.title, text: [work.desc, subject.name, type, year.label].join(' '),
+              year: yearId, subjectId: subject.id, workTitle: work.title
+            });
+          });
+        });
+      });
+    });
+
+    return idx;
+  }
+
+  function searchIndex(items, queryText) {
+    var q = queryText.toLowerCase().trim();
+    if (!q) return items.slice(0, 8);
+    var scored = [];
+    items.forEach(function (item) {
+      var title = item.title.toLowerCase();
+      var text = (item.text || '').toLowerCase();
+      var titleIdx = title.indexOf(q);
+      var textIdx = text.indexOf(q);
+      if (titleIdx === -1 && textIdx === -1) return;
+      // title matches rank above body matches; earlier matches rank slightly higher
+      var score = titleIdx !== -1 ? (1000 - titleIdx) : (100 - Math.min(textIdx, 99));
+      scored.push({ item: item, score: score });
+    });
+    scored.sort(function (a, b) { return b.score - a.score; });
+    return scored.slice(0, 8).map(function (s) { return s.item; });
+  }
+
+  // "from:academic virtual"  -> { hasFilterPrefix:true, filterFinalized:true,  section:'academic', rest:'virtual' }
+  // "from:aca"               -> { hasFilterPrefix:true, filterFinalized:false, token:'aca' }               (still typing the filter)
+  // "virtual machine"        -> { hasFilterPrefix:false, rest:'virtual machine' }
+  function parseSearchQuery(raw) {
+    var m = raw.match(/^\s*from:([a-z0-9_-]*)(\s+(.*))?$/i);
+    if (m) {
+      var finalized = m[2] !== undefined;
+      return {
+        hasFilterPrefix: true,
+        token: m[1],
+        rest: (m[3] || '').trim(),
+        filterFinalized: finalized,
+        section: finalized ? resolveSection(m[1]) : null
+      };
+    }
+    return { hasFilterPrefix: false, rest: raw.trim() };
+  }
+
+  function truncateSnippet(text, max) {
+    text = text.replace(/\s+/g, ' ').trim();
+    return text.length > max ? text.slice(0, max - 1) + '…' : text;
+  }
+
+  var SEARCH_INDEX = [];
+  var currentResultItems = [];
+  var activeResultIndex = -1;
+
+  function currentPageId() {
+    var el = document.querySelector('.page.active');
+    return el ? el.id.replace('page-', '') : 'home';
+  }
+
+  function closeSearchResults() {
+    var box = document.getElementById('search-results');
+    if (!box) return;
+    box.classList.remove('open');
+    box.innerHTML = '';
+    currentResultItems = [];
+    activeResultIndex = -1;
+    var input = document.getElementById('site-search');
+    if (input) input.setAttribute('aria-expanded', 'false');
+  }
+
+  // shown on focus when the box is empty — quick "from:" shortcuts, Discord-style
+  function renderEmptyHint() {
+    var box = document.getElementById('search-results');
+    if (!box) return;
+    var chips = SECTION_ORDER.map(function (key) {
+      return '<span class="search-chip" data-key="' + key + '">from:' + key + '</span>';
+    }).join('');
+    box.innerHTML =
+      '<div class="search-hint-label">Search the site, or narrow it with from:section</div>' +
+      '<div class="search-hint-chips">' + chips + '</div>';
+    box.querySelectorAll('.search-chip').forEach(function (chip) {
+      chip.addEventListener('mousedown', function (e) {
+        e.preventDefault();
+        var input = document.getElementById('site-search');
+        input.value = 'from:' + chip.getAttribute('data-key') + ' ';
+        input.focus();
+        handleSearchInput();
+      });
+    });
+    box.classList.add('open');
+    currentResultItems = [];
+    document.getElementById('site-search').setAttribute('aria-expanded', 'true');
+  }
+
+  // shown while typing the "from:" keyword itself, before a space finalizes it
+  function renderFilterSuggestions(token) {
+    var box = document.getElementById('search-results');
+    if (!box) return;
+    var t = (token || '').toLowerCase();
+    var matches = SECTION_ORDER.filter(function (key) {
+      if (key.indexOf(t) === 0) return true;
+      return SECTION_ALIASES[key].some(function (a) { return a.indexOf(t) === 0; });
+    });
+    if (matches.length === 0) {
+      box.innerHTML = '<div class="search-empty">No matching section. Try from:academic, from:projects, from:home, from:play, from:about, from:skills, from:achievements or from:contact.</div>';
+      box.classList.add('open');
+      currentResultItems = [];
+      return;
+    }
+    var html = '<div class="search-hint-label">Filter by section</div>';
+    matches.forEach(function (key) {
+      html +=
+        '<div class="search-result-item search-filter-suggestion" data-key="' + key + '">' +
+          '<span class="search-result-badge">from:</span>' +
+          '<span class="search-result-main">' +
+            '<span class="search-result-title">' + key + '</span>' +
+            '<span class="search-result-snippet">' + escapeHTML(SECTION_LABELS[key]) + '</span>' +
+          '</span>' +
+        '</div>';
+    });
+    box.innerHTML = html;
+    box.querySelectorAll('.search-filter-suggestion').forEach(function (row) {
+      row.addEventListener('mousedown', function (e) {
+        e.preventDefault();
+        var input = document.getElementById('site-search');
+        input.value = 'from:' + row.getAttribute('data-key') + ' ';
+        input.focus();
+        handleSearchInput();
+      });
+    });
+    box.classList.add('open');
+    currentResultItems = [];
+  }
+
+  function renderResults(items, emptyMsg) {
+    var box = document.getElementById('search-results');
+    if (!box) return;
+    if (!items || items.length === 0) {
+      box.innerHTML = '<div class="search-empty">' + escapeHTML(emptyMsg || 'No matches found.') + '</div>';
+      box.classList.add('open');
+      currentResultItems = [];
+      return;
+    }
+    var html = '';
+    items.forEach(function (item, i) {
+      html +=
+        '<div class="search-result-item" data-index="' + i + '">' +
+          '<span class="search-result-badge">' + escapeHTML(item.sectionLabel) + '</span>' +
+          '<span class="search-result-main">' +
+            '<span class="search-result-title">' + escapeHTML(item.title) + '</span>' +
+            (item.text ? '<span class="search-result-snippet">' + escapeHTML(truncateSnippet(item.text, 72)) + '</span>' : '') +
+          '</span>' +
+        '</div>';
+    });
+    box.innerHTML = html;
+    box.querySelectorAll('.search-result-item').forEach(function (row, i) {
+      row.addEventListener('mousedown', function (e) {
+        e.preventDefault();
+        activateResult(items[i]);
+      });
+    });
+    box.classList.add('open');
+    currentResultItems = items;
+    activeResultIndex = -1;
+  }
+
+  function handleSearchInput() {
+    var input = document.getElementById('site-search');
+    var raw = input.value;
+    input.setAttribute('aria-expanded', 'true');
+    if (!raw.trim()) {
+      renderEmptyHint();
+      return;
+    }
+    var parsed = parseSearchQuery(raw);
+    if (parsed.hasFilterPrefix && !parsed.filterFinalized) {
+      renderFilterSuggestions(parsed.token);
+      return;
+    }
+    var pool = SEARCH_INDEX;
+    var emptyMsg = 'No matches found.';
+    if (parsed.hasFilterPrefix) {
+      if (!parsed.section) {
+        renderResults([], 'Unknown section "' + parsed.token + '". Try from:academic, from:projects, from:home, from:play...');
+        return;
+      }
+      pool = SEARCH_INDEX.filter(function (item) {
+        return parsed.section === 'home' ? item.page === 'home' : item.section === parsed.section;
+      });
+      emptyMsg = 'No matches in ' + (SECTION_LABELS[parsed.section] || parsed.section) + '.';
+    }
+    var results = searchIndex(pool, parsed.rest);
+    renderResults(results, emptyMsg);
+  }
+
+  function moveActiveResult(delta) {
+    var rows = document.querySelectorAll('#search-results .search-result-item');
+    if (!rows.length) return;
+    activeResultIndex = (activeResultIndex + delta + rows.length) % rows.length;
+    rows.forEach(function (r, i) { r.classList.toggle('active', i === activeResultIndex); });
+    rows[activeResultIndex].scrollIntoView({ block: 'nearest' });
+  }
+
+  // restart the glow animation even if it's already mid-flash from a previous click
+  function flashHighlight(el) {
+    el.classList.remove('search-highlight');
+    void el.offsetWidth;
+    el.classList.add('search-highlight');
+    setTimeout(function () { el.classList.remove('search-highlight'); }, 1800);
+  }
+
+  function activateResult(item) {
+    closeSearchResults();
+    var input = document.getElementById('site-search');
+    input.blur();
+
+    // academic results carry a year/subject instead of a fixed DOM node, since
+    // the cards get rebuilt every time the pills change — so pick the right
+    // pills first, which regenerates the cards this result is pointing at.
+    if (item.page === 'academic') {
+      currentYear = item.year;
+      currentSubjectId = item.subjectId;
+      renderYearPills();
+      renderSubjectPills();
+      renderWorks();
+    }
+    if (item.page && item.page !== currentPageId()) {
+      showPage(item.page);
+    }
+
+    requestAnimationFrame(function () {
+      var target = item.highlight;
+      if (!target && item.page === 'academic') {
+        if (item.workTitle) {
+          var headers = document.querySelectorAll('#academic-works-content h3');
+          for (var i = 0; i < headers.length; i++) {
+            if (headers[i].textContent.trim() === item.workTitle) {
+              target = headers[i].closest('.project-card');
+              break;
+            }
+          }
+        }
+        if (!target) {
+          target = document.querySelector('#subject-pill-row .pill.active') || document.getElementById('academic-works-content');
+        }
+      }
+      if (target) {
+        target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        flashHighlight(target);
+      }
+    });
+  }
+
+  var siteSearchInput = document.getElementById('site-search');
+  if (siteSearchInput) {
+    siteSearchInput.addEventListener('input', handleSearchInput);
+    siteSearchInput.addEventListener('focus', function () {
+      if (!this.value.trim()) renderEmptyHint();
+      else handleSearchInput();
+    });
+    siteSearchInput.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowDown') {
+        if (currentResultItems.length) { e.preventDefault(); moveActiveResult(1); }
+      } else if (e.key === 'ArrowUp') {
+        if (currentResultItems.length) { e.preventDefault(); moveActiveResult(-1); }
+      } else if (e.key === 'Enter') {
+        e.preventDefault();
+        if (currentResultItems.length) {
+          var idx = activeResultIndex >= 0 ? activeResultIndex : 0;
+          activateResult(currentResultItems[idx]);
+        }
+      } else if (e.key === 'Escape') {
+        closeSearchResults();
+        this.blur();
+      }
+    });
+  }
+
+  document.addEventListener('click', function (e) {
+    var wrap = document.querySelector('.nav-search-wrap');
+    if (wrap && !wrap.contains(e.target)) closeSearchResults();
+  });
+
+  SEARCH_INDEX = buildSearchIndex();
+  // ================= END search =================
 </script>
 
 </body>
