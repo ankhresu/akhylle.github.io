@@ -93,6 +93,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 1.5rem;
   }
   .nav-name{
     font-family: var(--serif);
@@ -100,23 +101,92 @@
     font-size: 1.15rem;
     text-decoration: none;
     letter-spacing: 0.02em;
+    flex-shrink: 0;
   }
-  .nav-links{ display: flex; }
-  .nav-links a{
+
+  /* ---------- ADDED (step 1): nav-left groups the name with the new search bar ---------- */
+  .nav-left{
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+    min-width: 0;
+  }
+
+  /* ---------- ADDED (step 1): search bar UI. Not wired up yet — */
+  /* the "from:Section" keyword filtering + highlighting is a later step. */
+  /* CHANGED (step 2): width is now flexible instead of a fixed 150px, so it */
+  /* shares space with the icon nav cleanly instead of forcing a wrap. */
+  .nav-search{
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.5rem 0.9rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    flex: 1 1 auto;
+    min-width: 44px;
+    max-width: 230px;
+  }
+  .nav-search:focus-within{
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-dim);
+  }
+  .nav-search svg{
+    flex-shrink: 0;
+    color: var(--text-faint);
+  }
+  .nav-search-input{
+    background: none;
+    border: none;
+    outline: none;
+    color: var(--text);
     font-family: var(--mono);
-    text-transform: uppercase;
-    font-size: 0.7rem;
-    letter-spacing: 0.14em;
+    font-size: 0.75rem;
+    width: 100%;
+    min-width: 0;
+  }
+  .nav-search-input::placeholder{ color: var(--text-faint); }
+
+  /* ---------- CHANGED (step 2): nav-links rebuilt as compact icon buttons ---------- */
+  /* (was a row of uppercase text labels — "Academic Works" / "Personal Projects" */
+  /* made the bar crowded and wrapped awkwardly on small screens). */
+  .nav-links{
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    flex-shrink: 0;
+  }
+  .nav-links a{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
     color: var(--text-dim);
     text-decoration: none;
-    margin-left: 2.2rem;
-    padding-bottom: 4px;
-    border-bottom: 1px solid transparent;
-    transition: color 0.3s, border-color 0.3s;
+    border: 1px solid transparent;
+    transition: color 0.3s ease, background 0.3s ease, border-color 0.3s ease;
   }
-  .nav-links a:hover{ color: var(--accent); border-color: var(--accent); }
+  .nav-links a svg{ width: 18px; height: 18px; }
+  .nav-links a:hover{ color: var(--accent); background: var(--accent-dim); }
+  /* highlights whichever page is currently open */
+  .nav-links a.active{
+    color: var(--accent);
+    background: var(--accent-dim);
+    border-color: var(--border);
+  }
 
   main{ position: relative; z-index: 2; }
+
+  /* ---------- ADDED (step 1): page routing ---------- */
+  /* This file stays a single index.html, so "different pages" are simulated */
+  /* by showing one full-page block at a time and syncing the URL hash (#home, */
+  /* #academic, #projects, #play) instead of scrolling through cut sections. */
+  .page{ display: none; }
+  .page.active{ display: block; }
 
   /* ---------- hero ---------- */
   .hero{
@@ -153,28 +223,65 @@
     margin-bottom: 3.2rem;
   }
 
-  /* ---------- photo frame ---------- */
-  .photo-frame{
+  /* ---------- ADDED (step 2): scrollable photo gallery ---------- */
+  /* Replaces the old single circular .photo-frame. Auto-adjustable: each */
+  /* photo is one .photo-scroll-item block, so adding a picture just means */
+  /* filling in an empty src, or copying a block in for a brand new one — */
+  /* the strip lays itself out and scrolls sideways on its own either way. */
+  .photo-scroll-wrap{
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+  .photo-scroll{
+    display: flex;
+    gap: 1rem;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    padding: 0.3rem 0.2rem 1rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .photo-scroll::-webkit-scrollbar{ height: 6px; }
+  .photo-scroll::-webkit-scrollbar-track{ background: transparent; }
+  .photo-scroll::-webkit-scrollbar-thumb{ background: var(--border); border-radius: 999px; }
+  .photo-scroll::-webkit-scrollbar-thumb:hover{ background: var(--accent); }
+  .photo-scroll-item{
+    flex: 0 0 auto;
     width: 190px;
-    height: 190px;
-    border-radius: 50%;
+    aspect-ratio: 3 / 4;
+    scroll-snap-align: start;
     position: relative;
     overflow: hidden;
+    border-radius: 8px;
     border: 1px solid var(--border);
     background: radial-gradient(circle at 50% 30%, var(--surface-raised), var(--bg) 80%);
-    box-shadow: 0 20px 60px -20px rgba(0,0,0,0.85), inset 0 0 40px rgba(0,0,0,0.6);
-    transition: box-shadow 0.4s ease;
+    box-shadow: 0 16px 40px -18px rgba(0,0,0,0.8);
+    transition: border-color 0.4s ease, box-shadow 0.4s ease, transform 0.3s ease;
   }
-  .photo-frame:hover{
-    box-shadow: 0 0 0 1px var(--accent), 0 0 70px -10px var(--accent-glow), inset 0 0 40px rgba(0,0,0,0.4);
+  .photo-scroll-item:hover{
+    border-color: var(--accent);
+    box-shadow: 0 0 0 1px var(--accent), 0 0 50px -12px var(--accent-glow);
+    transform: translateY(-3px);
   }
-  .photo-frame img{
+  .photo-scroll-item img{
     width: 100%;
     height: 100%;
     object-fit: cover;
     position: relative;
     z-index: 2;
   }
+  .scroll-hint{
+    margin-top: 0.9rem;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--text-faint);
+  }
+
+  /* reused by the photo gallery above, plus anywhere else an empty image slot needs a fallback */
   .photo-placeholder{
     position: absolute;
     inset: 0;
@@ -206,6 +313,15 @@
     font-size: clamp(2rem, 4vw, 2.7rem);
     margin-bottom: 2rem;
   }
+  /* ADDED (step 1): short supporting line under a section title, used by Achievements */
+  .section-note{
+    color: var(--text-dim);
+    font-size: 0.95rem;
+    line-height: 1.7;
+    max-width: 60ch;
+    margin-top: -1.1rem;
+    margin-bottom: 2rem;
+  }
 
   /* ---------- about ---------- */
   .bio-text{
@@ -213,6 +329,52 @@
     line-height: 1.9;
     color: var(--text-dim);
     max-width: 64ch;
+  }
+
+  /* ---------- ADDED (step 1): achievements gallery ---------- */
+  /* Auto-adjustable: the grid re-flows on its own as cards are added or removed, */
+  /* so dropping in more <div class="achievement-card"> blocks is all that's needed. */
+  .achievements-grid{
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 1rem;
+  }
+  .achievement-card{
+    aspect-ratio: 1 / 1;
+    position: relative;
+    overflow: hidden;
+    border-radius: 6px;
+    border: 1px solid var(--border-soft);
+    background: repeating-linear-gradient(135deg, var(--surface) 0 12px, var(--surface-raised) 12px 24px);
+    transition: border-color 0.3s ease, transform 0.3s ease;
+  }
+  .achievement-card:hover{
+    border-color: var(--border);
+    transform: translateY(-3px);
+  }
+  .achievement-card img{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: relative;
+    z-index: 2;
+  }
+  .achievement-placeholder{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    color: var(--text-faint);
+    z-index: 1;
+  }
+  .achievement-placeholder span{
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
   }
 
   /* ---------- skills ---------- */
@@ -241,7 +403,9 @@
     transform: translateY(-2px);
   }
 
-  /* ---------- work ---------- */
+  /* ---------- work (unchanged — used by the Personal Projects page's card grid). */
+  /* CHANGED (step 3): Academic Works no longer uses this grid — it has its own */
+  /* .work-scroll layout below, though it still reuses the same .project-card. ---------- */
   .work-grid{
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -314,6 +478,133 @@
   }
   .project-link:hover{ border-color: var(--accent); }
 
+  /* ---------- ADDED (step 3): Academic Works interactive browser ---------- */
+  .academic-controls{
+    display: flex;
+    flex-direction: column;
+    gap: 1.4rem;
+    margin-bottom: 3rem;
+  }
+  .selector-label{
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--text-faint);
+    margin-bottom: 0.7rem;
+  }
+  /* scrollable row shared by the year selector and the subject selector */
+  .pill-row{
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    overflow-x: auto;
+    padding: 0.15rem 0.15rem 0.6rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .pill-row::-webkit-scrollbar{ height: 6px; }
+  .pill-row::-webkit-scrollbar-track{ background: transparent; }
+  .pill-row::-webkit-scrollbar-thumb{ background: var(--border); border-radius: 999px; }
+  .pill-row::-webkit-scrollbar-thumb:hover{ background: var(--accent); }
+  .pill{
+    flex: 0 0 auto;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.03em;
+    padding: 0.55rem 1.15rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--surface);
+    color: var(--text-dim);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.3s ease;
+  }
+  .pill:hover{
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+  }
+  .pill.active{
+    border-color: var(--accent);
+    background: var(--accent);
+    color: var(--bg);
+    box-shadow: 0 0 20px -6px var(--accent-glow);
+  }
+  /* the "===" divider grouping/separating subjects in the subject selector */
+  .subject-divider{
+    flex: 0 0 auto;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    color: var(--text-faint);
+    user-select: none;
+  }
+
+  /* one block per work type (Seatwork / Quiz / Activities / Laboratory / Long Quiz / Exam) */
+  .work-type-group{ margin-bottom: 2.8rem; }
+  .work-type-group:last-child{ margin-bottom: 0; }
+  .work-type-label{
+    font-family: var(--mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.14em;
+    color: var(--accent);
+    margin-bottom: 1.1rem;
+  }
+  /* works within a type scroll sideways instead of wrapping into a grid */
+  .work-scroll{
+    display: flex;
+    gap: 1.5rem;
+    overflow-x: auto;
+    padding: 0.2rem 0.2rem 1rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+  .work-scroll::-webkit-scrollbar{ height: 6px; }
+  .work-scroll::-webkit-scrollbar-track{ background: transparent; }
+  .work-scroll::-webkit-scrollbar-thumb{ background: var(--border); border-radius: 999px; }
+  .work-scroll::-webkit-scrollbar-thumb:hover{ background: var(--accent); }
+  /* cards keep the exact .project-card look — this just stops them stretching full-width in a scroll row */
+  .work-scroll .project-card{ flex: 0 0 300px; }
+
+  /* faded/italic styling used only by the auto-generated null work card */
+  .project-body h3.untitled,
+  .project-body p.untitled{
+    color: var(--text-faint);
+    font-style: italic;
+  }
+  /* wrapper that centers the single null card when a subject has no real work yet */
+  .null-work-wrap{
+    display: flex;
+    justify-content: center;
+    padding: 0.5rem 0;
+  }
+  .null-work-wrap .project-card{
+    width: 100%;
+    max-width: 320px;
+  }
+
+  /* ---------- ADDED (step 1): play page empty state ---------- */
+  .play-empty{
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    padding: 4.5rem 2rem;
+    text-align: center;
+    color: var(--text-faint);
+  }
+  .play-empty svg{
+    color: var(--text-faint);
+    margin-bottom: 1.2rem;
+  }
+  .play-empty p{
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
   /* ---------- contact ---------- */
   .contact-text{
     color: var(--text-dim);
@@ -354,9 +645,19 @@
   /* ---------- responsive ---------- */
   @media (max-width: 640px){
     section{ padding: 5rem 1.5rem; }
-    .nav-inner{ padding: 1.2rem 1.5rem; }
-    .nav-links a{ margin-left: 1.1rem; font-size: 0.62rem; letter-spacing: 0.08em; }
+    /* CHANGED (step 2): icon nav is compact enough to stay on one row now, */
+    /* so name + search + icons no longer need to wrap onto separate lines. */
+    .nav-inner{ padding: 1rem 1.1rem; gap: 0.6rem; }
+    .nav-left{ gap: 0.6rem; }
+    .nav-search{ min-width: 36px; padding: 0.42rem 0.7rem; }
+    .nav-links{ gap: 0.2rem; }
+    .nav-links a{ width: 34px; height: 34px; }
+    .nav-links a svg{ width: 17px; height: 17px; }
     .work-grid{ grid-template-columns: 1fr; }
+    /* ADDED (step 2): smaller gallery cards on narrow screens */
+    .photo-scroll-item{ width: 150px; }
+    /* ADDED (step 3): narrower academic work cards on narrow screens */
+    .work-scroll .project-card{ flex-basis: 260px; }
   }
 
   @media (prefers-reduced-motion: reduce){
@@ -371,87 +672,185 @@
 <div id="spotlight"></div>
 
 <!-- ============================== NAVIGATION ============================== -->
+<!-- CHANGED (step 1): nav links now switch pages via JS instead of scrolling to -->
+<!-- an anchor, and the name is grouped with a new (not yet working) search bar. -->
 <header class="nav">
   <div class="nav-inner">
 
-    <a href="#top" class="nav-name">Akhylle</a>
+    <div class="nav-left">
+      <a href="#home" data-page="home" class="nav-name">Akhylle</a>
+
+      <!-- ADDED (step 1): search bar UI only — filtering logic comes in a later step -->
+      <div class="nav-search">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle>
+          <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+        </svg>
+        <input type="text" class="nav-search-input" id="site-search" placeholder="Search...">
+      </div>
+    </div>
+
+    <!-- CHANGED (step 2): text labels swapped for icons (house / book / person / controller) -->
+    <!-- title + aria-label keep each button's purpose readable for tooltips and screen readers. -->
     <nav class="nav-links">
-      <a href="#about">About</a>
-      <a href="#skills">Skills</a>
-      <a href="#work">Work</a>
-      <a href="#contact">Contact</a>
+      <a href="#home" data-page="home" title="Home" aria-label="Home">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 12l9-9 9 9"></path>
+          <path d="M5 10v10a1 1 0 0 0 1 1h3v-6h6v6h3a1 1 0 0 0 1-1V10"></path>
+        </svg>
+      </a>
+      <a href="#academic" data-page="academic" title="Academic Works" aria-label="Academic Works">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M4 5.5c2-1 5-1 8 .5V19c-3-1.5-6-1.5-8-.5V5.5Z"></path>
+          <path d="M20 5.5c-2-1-5-1-8 .5V19c3-1.5 6-1.5 8-.5V5.5Z"></path>
+        </svg>
+      </a>
+      <a href="#projects" data-page="projects" title="Personal Projects" aria-label="Personal Projects">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+          <circle cx="12" cy="8" r="4"></circle>
+          <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
+        </svg>
+      </a>
+      <a href="#play" data-page="play" title="Play" aria-label="Play">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4">
+          <rect x="2" y="7" width="20" height="10" rx="5"></rect>
+          <line x1="7" y1="10" x2="7" y2="14"></line>
+          <line x1="5" y1="12" x2="9" y2="12"></line>
+          <circle cx="15" cy="10.5" r="1"></circle>
+          <circle cx="17.5" cy="13" r="1"></circle>
+        </svg>
+      </a>
     </nav>
   </div>
 </header>
 
 <main>
 
-  <!-- ============================== HERO ============================== -->
-  <section class="hero" id="top">
-    <p class="eyebrow">Portfolio</p>
+  <!-- ============================== HOME PAGE ============================== -->
+  <!-- CHANGED (step 1): About + Skills + Contact (formerly separate nav sections) -->
+  <!-- now live together on one Home page, with a new Achievements section added. -->
+  <div class="page active" id="page-home">
 
-    <h1 class="hero-name">Akhylle Rei Resurreccion Toledo</h1>
+    <!-- ---------------- HERO ---------------- -->
+    <section class="hero" id="top">
+      <p class="eyebrow">Portfolio</p>
 
-    <p class="hero-role">Aspiring Software Engineer</p>
+      <h1 class="hero-name">Akhylle Rei Resurreccion Toledo</h1>
 
-    <div class="photo-frame">
-      <img id="profile-photo" data-slot="image/me.jpg" src="image/me.jpg" alt="Akhylle">
-      <div class="photo-placeholder">
-        <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
-          <circle cx="12" cy="8" r="4"></circle>
-          <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
-        </svg>
-        <span>Add photo</span>
+      <p class="hero-role">Aspiring Software Engineer</p>
+
+      <!-- CHANGED (step 2): the single circular photo swapped for a horizontally -->
+      <!-- scrollable strip of square/rectangular photos. Auto-adjustable: fill in -->
+      <!-- an empty src to drop a picture into an existing slot, or copy one -->
+      <!-- .photo-scroll-item block to add a brand new slot — same auto-hide -->
+      <!-- convention as everywhere else (empty src = placeholder stays visible). -->
+      <div class="photo-scroll-wrap">
+        <div class="photo-scroll">
+
+          <div class="photo-scroll-item">
+            <img data-slot="photo-1" src="image/me.jpg" alt="Akhylle 1">
+            <div class="photo-placeholder">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
+              </svg>
+              <span>Add photo</span>
+            </div>
+          </div>
+
+          <div class="photo-scroll-item">
+            <img data-slot="photo-2" src="" alt="Akhylle 2">
+            <div class="photo-placeholder">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
+              </svg>
+              <span>Add photo</span>
+            </div>
+          </div>
+
+          <div class="photo-scroll-item">
+            <img data-slot="photo-3" src="" alt="Akhylle 3">
+            <div class="photo-placeholder">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
+              </svg>
+              <span>Add photo</span>
+            </div>
+          </div>
+
+          <div class="photo-scroll-item">
+            <img data-slot="photo-4" src="" alt="Akhylle 4">
+            <div class="photo-placeholder">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
+              </svg>
+              <span>Add photo</span>
+            </div>
+          </div>
+
+          <div class="photo-scroll-item">
+            <img data-slot="photo-5" src="" alt="Akhylle 5">
+            <div class="photo-placeholder">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
+              </svg>
+              <span>Add photo</span>
+            </div>
+          </div>
+
+          <div class="photo-scroll-item">
+            <img data-slot="photo-6" src="" alt="Akhylle 6">
+            <div class="photo-placeholder">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                <circle cx="12" cy="8" r="4"></circle>
+                <path d="M4 20c0-4.4 3.6-7 8-7s8 2.6 8 7"></path>
+              </svg>
+              <span>Add photo</span>
+            </div>
+          </div>
+
+        </div>
       </div>
-    </div>
-  </section>
+      <p class="scroll-hint">Scroll for more →</p>
+    </section>
 
-  <!-- ============================== ABOUT / BIO ============================== -->
-  <section class="about" id="about">
-    <p class="eyebrow">01 — About</p>
-    <h2 class="section-title">Bio</h2>
-    <p class="bio-text">
-      I'm Akhylle Rei Resurreccion Toledo, a 20-year-old aspiring software engineer. 
-      My interest in tech traces back to elementary school, when I spent hours writing JASS 
-      scripts in the Warcraft III World Editor — tinkering with unit behaviors, abilities, 
-      and terrain just to build a game that matched what was in my head. My brother noticed 
-      how much time I sank into it, and that moment nudged me away from a near-detour into 
-      criminology and onto a tech path instead. Outside of code, I'm usually watching whatever media 
-      I'm into, cracking jokes with people I like, socializing, or tweaking things — games, tools, setups 
-      — until they fit exactly how I want them.
+    <!-- ---------------- ABOUT / BIO ---------------- -->
+    <section class="about" id="about">
+      <p class="eyebrow">01 — About</p>
+      <h2 class="section-title">Bio</h2>
+      <p class="bio-text">
+        I'm Akhylle Rei Resurreccion Toledo, a 20-year-old aspiring software engineer. 
+        My interest in tech traces back to elementary school, when I spent hours writing JASS 
+        scripts in the Warcraft III World Editor — tinkering with unit behaviors, abilities, 
+        and terrain just to build a game that matched what was in my head. My brother noticed 
+        how much time I sank into it, and that moment nudged me away from a near-detour into 
+        criminology and onto a tech path instead. Outside of code, I'm usually watching whatever media 
+        I'm into, cracking jokes with people I like, socializing, or tweaking things — games, tools, setups 
+        — until they fit exactly how I want them.
 
-      Portfolio for other works such as university focused Quizes, Activities, and Projects are coming soon
-    </p>
-  </section>
+        Portfolio for other works such as university focused Quizes, Activities, and Projects are coming soon
+      </p>
+    </section>
 
-  <!-- ============================== SKILLS ============================== -->
-  <section class="skills" id="skills">
-    <p class="eyebrow">02 — Skills</p>
-    <h2 class="section-title">What I work with</h2>
-    <ul class="skills-grid">
-      <li class="skill-chip">Java</li>
-      <li class="skill-chip">Python</li>
-      <li class="skill-chip">Photoshop</li>
-      <li class="skill-chip">Figma</li>
-      <li class="skill-chip">Artificial Intelligence</li>
-      <li class="skill-chip">Windows Batch Scripting Language</li>
-      <li class="skill-chip">C++</li>
-      <li class="skill-chip">JASS</li>
-    </ul>
-  </section>
+    <!-- ---------------- ADDED (step 1): ACHIEVEMENTS ---------------- -->
+    <!-- Same auto-hide convention as the photo above: each img has a data-slot -->
+    <!-- attribute, and the script at the bottom hides any image whose src is empty. -->
+    <!-- To add a new achievement, copy one .achievement-card block and point its -->
+    <!-- img src at your picture — the grid re-flows on its own. -->
+    <section class="achievements" id="achievements">
+      <p class="eyebrow">02 — Achievements</p>
+      <h2 class="section-title">Achievements</h2>
+      <p class="section-note">Certificates, awards, and milestones worth keeping around.</p>
+      <div class="achievements-grid">
 
-  <!-- ============================== WORK / DESIGN EXAMPLES ============================== -->
-  <section class="work" id="work">
-    <p class="eyebrow">03 — Work</p>
-    <h2 class="section-title">Selected Work</h2>
-    <div class="work-grid">
-
-
-      <article class="project-card">
-        <div class="project-image">
-          <img data-slot="demonqueen" src="image/demonqueen.jpg" alt="The Demon Queen RPG">
-          <div class="project-placeholder">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+        <div class="achievement-card">
+          <img data-slot="achievement-1" src="" alt="Achievement 1">
+          <div class="achievement-placeholder">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
               <rect x="3" y="4" width="18" height="16" rx="1"></rect>
               <circle cx="8.5" cy="9.5" r="1.5"></circle>
               <path d="M21 16l-5-5-4 4-3-3-6 6"></path>
@@ -459,26 +858,11 @@
             <span>Add image</span>
           </div>
         </div>
-        <div class="project-body">
-          <h3>Demon Queen RPG</h3>
-          <p>This project is done when I'm bored during a class. Out of boredom, I got the feeling of creating a game
-            file through using a Java language using Eclipse IDE. It has its own UI and window where it shows the castle
-            of the enemy boss fight you're gonna encounter, which in the name suggests, is the Demon Queen herself. I just took
-            a random Demon Queen image online and put it as her appearance for the game. The concept of the game is to guess a number from 1 to 1,000,000
-            for the reason that you need to find her "weakspot". The closer you are to the weakspot, the higher damage you'll deal to the Demon Queen
-            . On paper, I'm thinking of adding additional features like actually making the Demon Queen attack, an option for the player to attack, defend, or use
-            skills, and HP for the player and how they would be defeated. Currently, the latest version I made only includes the window, images, damage dealing of the
-            player to the Demon Queen, and Demon Queen's dialogues.</p>
-          <a href="#" class="project-link">View project →</a>
-        </div>
-      </article>
 
-
-      <article class="project-card">
-        <div class="project-image">
-          <img data-slot="amelia" src="image/amelia.jpg" alt="Amelia Platformer">
-          <div class="project-placeholder">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+        <div class="achievement-card">
+          <img data-slot="achievement-2" src="" alt="Achievement 2">
+          <div class="achievement-placeholder">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
               <rect x="3" y="4" width="18" height="16" rx="1"></rect>
               <circle cx="8.5" cy="9.5" r="1.5"></circle>
               <path d="M21 16l-5-5-4 4-3-3-6 6"></path>
@@ -486,23 +870,11 @@
             <span>Add image</span>
           </div>
         </div>
-        <div class="project-body">
-          <h3>Amelia Platformer</h3>
-          <p>This project is done when I'm still a freshman in university. I'm testing to actually code and the language I chosen
-            at that time is Java. I use Eclipse IDE as my compiler for this project and I'm usually watching a guide in Youtube for
-            this project. This game project is a platformer game where I planned when I'm still a vtuber fan and I want to see
-            Amelia Watson from Hololive do a ground pound attacks on her enemies. The farthest I've done in this project 
-            is to animate the main player sprite with her own idle, running, jumping,
-            and attack animations. Though I struggled that time on making collission for the terrain so I abandoned this project.</p>
-          <a href="#" class="project-link">View project →</a>
-        </div>
-      </article>
-      
-      <article class="project-card">
-        <div class="project-image">
-          <img data-slot="Virtual Machine Setup" src="image/Screenshot 2026-08-27 112946.png" alt="Virtual Machine Setup">
-          <div class="project-placeholder">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+
+        <div class="achievement-card">
+          <img data-slot="achievement-3" src="" alt="Achievement 3">
+          <div class="achievement-placeholder">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
               <rect x="3" y="4" width="18" height="16" rx="1"></rect>
               <circle cx="8.5" cy="9.5" r="1.5"></circle>
               <path d="M21 16l-5-5-4 4-3-3-6 6"></path>
@@ -510,18 +882,11 @@
             <span>Add image</span>
           </div>
         </div>
-        <div class="project-body">
-          <h3>Virtual Machine Setup</h3>
-          <p>Ubuntu Installation Setup activity, a requirement in Cloud Computing - Elective 3.</p>
-          <a href="image/Virtual Machine Setup-TOLEDO.pdf" class="project-link">View project →</a>
-        </div>
-      </article>
 
-      <article class="project-card">
-        <div class="project-image">
-          <img data-slot="server" src="image/serverterranova.png" alt="ServerVirtualBox">
-          <div class="project-placeholder">
-            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+        <div class="achievement-card">
+          <img data-slot="achievement-4" src="" alt="Achievement 4">
+          <div class="achievement-placeholder">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
               <rect x="3" y="4" width="18" height="16" rx="1"></rect>
               <circle cx="8.5" cy="9.5" r="1.5"></circle>
               <path d="M21 16l-5-5-4 4-3-3-6 6"></path>
@@ -529,27 +894,155 @@
             <span>Add image</span>
           </div>
         </div>
-        <div class="project-body">
-          <h3>VM Server</h3>
-          <p>Yes.</p>
-          <a href="image/TOLEDO-LabAct2.pdf" class="project-link">View project →</a>
+
+      </div>
+    </section>
+
+    <!-- ---------------- SKILLS ---------------- -->
+    <section class="skills" id="skills">
+      <p class="eyebrow">03 — Skills</p>
+      <h2 class="section-title">What I work with</h2>
+      <ul class="skills-grid">
+        <li class="skill-chip">Java</li>
+        <li class="skill-chip">Python</li>
+        <li class="skill-chip">Photoshop</li>
+        <li class="skill-chip">Figma</li>
+        <li class="skill-chip">Artificial Intelligence</li>
+        <li class="skill-chip">Windows Batch Scripting Language</li>
+        <li class="skill-chip">C++</li>
+        <li class="skill-chip">JASS</li>
+      </ul>
+    </section>
+
+    <!-- ---------------- CONTACT ---------------- -->
+    <section class="contact" id="contact">
+      <p class="eyebrow">04 — Contact</p>
+      <h2 class="section-title">Get in touch</h2>
+      <p class="contact-text">Interested in working together, or just want to say hi? Reach out.</p>
+      <div class="contact-links">
+        <a href="mailto:arrtoledo@pcu.edu.ph">Email</a>
+        <a href="https://www.linkedin.com/in/akhylle-toledo-3bab59351/">LinkedIn</a>
+        <a href="https://github.com/ankhresu">GitHub</a>
+      </div>
+    </section>
+
+  </div>
+  <!-- ============================== END HOME PAGE ============================== -->
+
+
+  <!-- ============================== ACADEMIC WORKS PAGE ============================== -->
+  <!-- CHANGED (step 3): rebuilt as a data-driven browser. Year level and subject are -->
+  <!-- picked with the two pill rows below; the work cards underneath are generated by -->
+  <!-- script/academic-works.js (bottom of page) from the ACADEMIC_YEARS data object, -->
+  <!-- grouped by type (Seatwork/Quiz/Activities/Laboratory/Long Quiz/Exam) and scrollable -->
+  <!-- sideways within each type. The Virtual Machine Setup + VM Server cards still render -->
+  <!-- with the exact same markup/classes as before — they're just templated from data now. -->
+  <div class="page" id="page-academic">
+    <section class="academic" id="academic-works">
+      <p class="eyebrow">Academic Works</p>
+      <h2 class="section-title">Academic Works</h2>
+
+      <div class="academic-controls">
+        <div>
+          <p class="selector-label">Year Level</p>
+          <div class="pill-row" id="year-pill-row"></div>
         </div>
-      </article>
+        <div>
+          <p class="selector-label">Subject</p>
+          <div class="pill-row" id="subject-pill-row"></div>
+        </div>
+      </div>
 
-    </div>
-  </section>
+      <div id="academic-works-content"></div>
+    </section>
+  </div>
+  <!-- ============================== END ACADEMIC WORKS PAGE ============================== -->
 
-  <!-- ============================== CONTACT ============================== -->
-  <section class="contact" id="contact">
-    <p class="eyebrow">04 — Contact</p>
-    <h2 class="section-title">Get in touch</h2>
-    <p class="contact-text">Interested in working together, or just want to say hi? Reach out.</p>
-    <div class="contact-links">
-      <a href="mailto:arrtoledo@pcu.edu.ph">Email</a>
-      <a href="https://www.linkedin.com/in/akhylle-toledo-3bab59351/">LinkedIn</a>
-      <a href="https://github.com/ankhresu">GitHub</a>
-    </div>
-  </section>
+
+  <!-- ============================== PERSONAL PROJECTS PAGE ============================== -->
+  <!-- CHANGED (step 1): Demon Queen RPG + Amelia Platformer moved here from the old -->
+  <!-- combined "Work" section. Cards are untouched — same markup, same classes. -->
+  <div class="page" id="page-projects">
+    <section class="projects" id="personal-projects">
+      <p class="eyebrow">Personal Projects</p>
+      <h2 class="section-title">Selected Work</h2>
+      <div class="work-grid">
+
+        <article class="project-card">
+          <div class="project-image">
+            <img data-slot="demonqueen" src="image/demonqueen.jpg" alt="The Demon Queen RPG">
+            <div class="project-placeholder">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                <rect x="3" y="4" width="18" height="16" rx="1"></rect>
+                <circle cx="8.5" cy="9.5" r="1.5"></circle>
+                <path d="M21 16l-5-5-4 4-3-3-6 6"></path>
+              </svg>
+              <span>Add image</span>
+            </div>
+          </div>
+          <div class="project-body">
+            <h3>Demon Queen RPG</h3>
+            <p>This project is done when I'm bored during a class. Out of boredom, I got the feeling of creating a game
+              file through using a Java language using Eclipse IDE. It has its own UI and window where it shows the castle
+              of the enemy boss fight you're gonna encounter, which in the name suggests, is the Demon Queen herself. I just took
+              a random Demon Queen image online and put it as her appearance for the game. The concept of the game is to guess a number from 1 to 1,000,000
+              for the reason that you need to find her "weakspot". The closer you are to the weakspot, the higher damage you'll deal to the Demon Queen
+              . On paper, I'm thinking of adding additional features like actually making the Demon Queen attack, an option for the player to attack, defend, or use
+              skills, and HP for the player and how they would be defeated. Currently, the latest version I made only includes the window, images, damage dealing of the
+              player to the Demon Queen, and Demon Queen's dialogues.</p>
+            <a href="#" class="project-link">View project →</a>
+          </div>
+        </article>
+
+        <article class="project-card">
+          <div class="project-image">
+            <img data-slot="amelia" src="image/amelia.jpg" alt="Amelia Platformer">
+            <div class="project-placeholder">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">
+                <rect x="3" y="4" width="18" height="16" rx="1"></rect>
+                <circle cx="8.5" cy="9.5" r="1.5"></circle>
+                <path d="M21 16l-5-5-4 4-3-3-6 6"></path>
+              </svg>
+              <span>Add image</span>
+            </div>
+          </div>
+          <div class="project-body">
+            <h3>Amelia Platformer</h3>
+            <p>This project is done when I'm still a freshman in university. I'm testing to actually code and the language I chosen
+              at that time is Java. I use Eclipse IDE as my compiler for this project and I'm usually watching a guide in Youtube for
+              this project. This game project is a platformer game where I planned when I'm still a vtuber fan and I want to see
+              Amelia Watson from Hololive do a ground pound attacks on her enemies. The farthest I've done in this project 
+              is to animate the main player sprite with her own idle, running, jumping,
+              and attack animations. Though I struggled that time on making collission for the terrain so I abandoned this project.</p>
+            <a href="#" class="project-link">View project →</a>
+          </div>
+        </article>
+
+      </div>
+    </section>
+  </div>
+  <!-- ============================== END PERSONAL PROJECTS PAGE ============================== -->
+
+
+  <!-- ============================== ADDED (step 1): PLAY PAGE ============================== -->
+  <!-- Left empty on purpose — playable games go here later. -->
+  <div class="page" id="page-play">
+    <section class="play" id="play">
+      <p class="eyebrow">Play</p>
+      <h2 class="section-title">Play</h2>
+      <div class="play-empty">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" style="margin: 0 auto; display: block;">
+          <rect x="2" y="7" width="20" height="10" rx="5"></rect>
+          <line x1="7" y1="10" x2="7" y2="14"></line>
+          <line x1="5" y1="12" x2="9" y2="12"></line>
+          <circle cx="15" cy="10.5" r="1"></circle>
+          <circle cx="17.5" cy="13" r="1"></circle>
+        </svg>
+        <p>Playable games coming soon</p>
+      </div>
+    </section>
+  </div>
+  <!-- ============================== END PLAY PAGE ============================== -->
 
 </main>
 
@@ -570,15 +1063,282 @@
     spotlight.style.opacity = '0';
   });
 
-  //
-  // 
-  // 
-  document.querySelectorAll('img[data-slot]').forEach(function (img) {
-    var src = img.getAttribute('src');
-    if (!src || src.trim() === '') {
-      img.style.display = 'none';
+  // ================= ADDED (step 1): page routing =================
+  // Single-file site, so "pages" are simulated: one .page block is shown
+  // at a time and the URL hash is kept in sync so links/back-button work.
+  var pageIds = ['home', 'academic', 'projects', 'play'];
+
+  function showPage(pageId, pushState) {
+    if (pageIds.indexOf(pageId) === -1) pageId = 'home';
+
+    pageIds.forEach(function (id) {
+      var el = document.getElementById('page-' + id);
+      if (el) el.classList.toggle('active', id === pageId);
+    });
+
+    document.querySelectorAll('.nav-links a[data-page]').forEach(function (link) {
+      link.classList.toggle('active', link.getAttribute('data-page') === pageId);
+    });
+
+    if (pushState !== false) {
+      history.pushState(null, '', '#' + pageId);
     }
+    window.scrollTo(0, 0);
+  }
+
+  document.querySelectorAll('a[data-page]').forEach(function (link) {
+    link.addEventListener('click', function (e) {
+      e.preventDefault();
+      showPage(link.getAttribute('data-page'));
+    });
   });
+
+  window.addEventListener('popstate', function () {
+    showPage(location.hash.replace('#', '') || 'home', false);
+  });
+
+  // Land on whichever page the URL hash points to (defaults to Home)
+  showPage(location.hash.replace('#', '') || 'home', false);
+  // ================= END page routing =================
+
+  // ================= ADDED (step 3): Academic Works data + interactive browser =================
+  // Everything below renders from this one data object — nothing else needs to change.
+  // To add a year: add a key here and to ACADEMIC_YEAR_ORDER.
+  // To add a subject: push a { id, name, works } object into that year's `subjects` array.
+  // To add a work: push a { title, desc, img, slot, link } object into
+  //   subject.works["<Type>"], where <Type> is one of the WORK_TYPES below.
+  // A subject with no works in any type automatically shows a single blank "null" card.
+  var WORK_TYPES = ['Seatwork', 'Quiz', 'Activities', 'Laboratory', 'Long Quiz', 'Exam'];
+
+  var ACADEMIC_YEAR_ORDER = ['grade-11', 'grade-12', '1st-year', '2nd-year', '3rd-year', '4th-year'];
+
+  var ACADEMIC_YEARS = {
+    'grade-11': {
+      label: 'Grade 11',
+      subjects: [
+        { id: 'grade-11-none', name: 'No subject added yet', works: {} }
+      ]
+    },
+    'grade-12': {
+      label: 'Grade 12',
+      subjects: [
+        { id: 'entrepreneurship', name: 'Entrepreneurship', works: {} }
+      ]
+    },
+    '1st-year': {
+      label: '1st Year',
+      subjects: [
+        { id: '1st-year-none', name: 'No subject added yet', works: {} }
+      ]
+    },
+    '2nd-year': {
+      label: '2nd Year',
+      subjects: [
+        { id: '2nd-year-none', name: 'No subject added yet', works: {} }
+      ]
+    },
+    '3rd-year': {
+      label: '3rd Year',
+      subjects: [
+        {
+          id: 'cloud-computing',
+          name: 'Cloud Computing',
+          works: {
+            'Laboratory': [
+              {
+                title: 'Virtual Machine Setup',
+                desc: 'Ubuntu Installation Setup activity, a requirement in Cloud Computing - Elective 3.',
+                img: 'image/Screenshot 2026-08-27 112946.png',
+                slot: 'Virtual Machine Setup',
+                link: 'image/Virtual Machine Setup-TOLEDO.pdf'
+              },
+              {
+                title: 'VM Server',
+                desc: 'Yes.',
+                img: 'image/serverterranova.png',
+                slot: 'server',
+                link: 'image/TOLEDO-LabAct2.pdf'
+              }
+            ]
+          }
+        },
+        { id: 'visual-graphics', name: 'Visual Graphics', works: {} }
+      ]
+    },
+    '4th-year': {
+      label: '4th Year',
+      subjects: [
+        { id: '4th-year-none', name: 'No subject added yet', works: {} }
+      ]
+    }
+  };
+
+  // Default landing spot: the year/subject that actually has work in it.
+  var currentYear = '3rd-year';
+  var currentSubjectId = 'cloud-computing';
+
+  function escapeHTML(str) {
+    var d = document.createElement('div');
+    d.textContent = str == null ? '' : str;
+    return d.innerHTML;
+  }
+
+  function findSubject(yearId, subjectId) {
+    var subjects = ACADEMIC_YEARS[yearId].subjects;
+    for (var i = 0; i < subjects.length; i++) {
+      if (subjects[i].id === subjectId) return subjects[i];
+    }
+    return subjects[0];
+  }
+
+  // reused, exact same markup shape as the original hand-coded VM Setup / VM Server cards
+  function projectCardHTML(work) {
+    return (
+      '<article class="project-card">' +
+        '<div class="project-image">' +
+          '<img data-slot="' + escapeHTML(work.slot) + '" src="' + escapeHTML(work.img) + '" alt="' + escapeHTML(work.title) + '">' +
+          '<div class="project-placeholder">' +
+            '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">' +
+              '<rect x="3" y="4" width="18" height="16" rx="1"></rect>' +
+              '<circle cx="8.5" cy="9.5" r="1.5"></circle>' +
+              '<path d="M21 16l-5-5-4 4-3-3-6 6"></path>' +
+            '</svg>' +
+            '<span>Add image</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="project-body">' +
+          '<h3>' + escapeHTML(work.title) + '</h3>' +
+          '<p>' + escapeHTML(work.desc) + '</p>' +
+          (work.link ? '<a href="' + escapeHTML(work.link) + '" class="project-link">View project →</a>' : '') +
+        '</div>' +
+      '</article>'
+    );
+  }
+
+  // auto-generated placeholder for a subject/year with nothing uploaded yet —
+  // same card shape, blank image slot, faint "untitled" text standing in for a title/description
+  function nullCardHTML() {
+    return (
+      '<article class="project-card">' +
+        '<div class="project-image">' +
+          '<img data-slot="null-work" src="" alt="Untitled work">' +
+          '<div class="project-placeholder">' +
+            '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3">' +
+              '<rect x="3" y="4" width="18" height="16" rx="1"></rect>' +
+              '<circle cx="8.5" cy="9.5" r="1.5"></circle>' +
+              '<path d="M21 16l-5-5-4 4-3-3-6 6"></path>' +
+            '</svg>' +
+            '<span>Add image</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="project-body">' +
+          '<h3 class="untitled">Untitled</h3>' +
+          '<p class="untitled">No work added yet.</p>' +
+        '</div>' +
+      '</article>'
+    );
+  }
+
+  function renderYearPills() {
+    var row = document.getElementById('year-pill-row');
+    if (!row) return;
+    row.innerHTML = '';
+    ACADEMIC_YEAR_ORDER.forEach(function (yearId) {
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pill' + (yearId === currentYear ? ' active' : '');
+      btn.textContent = ACADEMIC_YEARS[yearId].label;
+      btn.addEventListener('click', function () {
+        if (yearId === currentYear) return;
+        currentYear = yearId;
+        currentSubjectId = ACADEMIC_YEARS[yearId].subjects[0].id;
+        renderYearPills();
+        renderSubjectPills();
+        renderWorks();
+      });
+      row.appendChild(btn);
+    });
+  }
+
+  function renderSubjectPills() {
+    var row = document.getElementById('subject-pill-row');
+    if (!row) return;
+    row.innerHTML = '';
+    var subjects = ACADEMIC_YEARS[currentYear].subjects;
+    subjects.forEach(function (subject, i) {
+      if (i > 0) {
+        var divider = document.createElement('span');
+        divider.className = 'subject-divider';
+        divider.textContent = '===';
+        row.appendChild(divider);
+      }
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'pill' + (subject.id === currentSubjectId ? ' active' : '');
+      btn.textContent = subject.name;
+      btn.addEventListener('click', function () {
+        if (subject.id === currentSubjectId) return;
+        currentSubjectId = subject.id;
+        renderSubjectPills();
+        renderWorks();
+      });
+      row.appendChild(btn);
+    });
+  }
+
+  function renderWorks() {
+    var container = document.getElementById('academic-works-content');
+    if (!container) return;
+    container.innerHTML = '';
+
+    var subject = findSubject(currentYear, currentSubjectId);
+    var typesWithWork = WORK_TYPES.filter(function (type) {
+      return subject.works[type] && subject.works[type].length > 0;
+    });
+
+    if (typesWithWork.length === 0) {
+      var wrap = document.createElement('div');
+      wrap.className = 'null-work-wrap';
+      wrap.innerHTML = nullCardHTML();
+      container.appendChild(wrap);
+    } else {
+      typesWithWork.forEach(function (type) {
+        var group = document.createElement('div');
+        group.className = 'work-type-group';
+
+        var label = document.createElement('p');
+        label.className = 'work-type-label';
+        label.textContent = type;
+
+        var scroll = document.createElement('div');
+        scroll.className = 'work-scroll';
+        subject.works[type].forEach(function (work) {
+          scroll.innerHTML += projectCardHTML(work);
+        });
+
+        group.appendChild(label);
+        group.appendChild(scroll);
+        container.appendChild(group);
+      });
+    }
+
+    hideEmptyImages();
+  }
+
+  renderYearPills();
+  renderSubjectPills();
+  renderWorks();
+  // ================= END Academic Works =================
+
+  // Hides any image (profile photo, achievements, project cards, academic work cards)
+  // whose src is empty, leaving its placeholder visible. Re-run after any dynamic re-render.
+  function hideEmptyImages() {
+    document.querySelectorAll('img[data-slot]').forEach(function (img) {
+      var src = img.getAttribute('src');
+      img.style.display = (!src || src.trim() === '') ? 'none' : '';
+    });
+  }
+  hideEmptyImages();
 </script>
 
 </body>
