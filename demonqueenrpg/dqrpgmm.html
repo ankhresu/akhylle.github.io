@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Demon Queen RPG</title>
+<style>
+  :root { --ink:#f6eaf0; --panel:rgba(14,6,18,.86); --accent:#c2185b; }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body {
+    background: linear-gradient(160deg, #2a0f36, #0e0512) center / cover no-repeat;
+    color: var(--ink);
+    font-family: Georgia, "Times New Roman", serif;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 36px; padding: 16px;
+  }
+
+  /* Title */
+  #title-image { max-width: min(90vw, 640px); max-height: 30vh; display: none; }
+  #title-text { margin: 0; font-size: clamp(2rem, 7vw, 4rem); font-weight: normal; text-align: center; letter-spacing: .04em; text-shadow: 0 3px 12px #000; }
+
+  /* Menu buttons: text fallback by default, image mode when images load */
+  #menu, #settings { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+  #settings[hidden], #menu[hidden] { display: none; }
+  .menu-btn {
+    min-width: 220px; padding: 12px 24px; font: inherit; font-size: 1.15rem;
+    color: #fff; background: rgba(30,12,40,.85); border: 2px solid #6a2a80;
+    border-radius: 6px; cursor: pointer;
+  }
+  .menu-btn:hover, .menu-btn:focus-visible { background: var(--accent); border-color: #ff80ab; }
+  .menu-btn:active { background: #7d0f3b; transform: translateY(1px); }
+
+  .menu-btn.has-img {
+    width: var(--w); height: var(--h); min-width: 0; padding: 0;
+    background: var(--img-default) center / 100% 100% no-repeat transparent;
+    border: 0; color: transparent; font-size: 0; transform: none;
+  }
+  .menu-btn.has-img:hover, .menu-btn.has-img:focus-visible { background-image: var(--img-hover); }
+  .menu-btn.has-img:active { background-image: var(--img-pressed); }
+  :focus-visible { outline: 3px solid #ffd54f; outline-offset: 3px; }
+
+  /* Settings panel */
+  #settings { background: var(--panel); padding: 24px 28px; border-radius: 10px; width: min(92vw, 420px); align-items: stretch; }
+  #settings h2 { margin: 0 0 4px; font-weight: normal; text-align: center; }
+  .row { display: flex; flex-direction: column; gap: 6px; }
+  .row label, .row .label { display: flex; justify-content: space-between; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  .diff { display: flex; gap: 8px; }
+  .diff button {
+    flex: 1; padding: 8px; font: inherit; color: #fff; cursor: pointer;
+    background: rgba(255,255,255,.08); border: 2px solid #6a2a80; border-radius: 6px;
+  }
+  .diff button[aria-pressed=true] { background: var(--accent); border-color: #ff80ab; }
+  #settings .menu-btn { align-self: center; margin-top: 8px; }
+
+  #music-hint { position: fixed; bottom: 10px; font-size: .85rem; opacity: .7; }
+</style>
+</head>
+<body>
+
+  <img id="title-image" alt="">
+  <h1 id="title-text"></h1>
+
+  <nav id="menu" aria-label="Main menu">
+    <button class="menu-btn" data-key="start">Start</button>
+    <button class="menu-btn" data-key="settings">Settings</button>
+    <button class="menu-btn" data-key="exit">Exit</button>
+  </nav>
+
+  <section id="settings" hidden aria-label="Settings">
+    <h2>Settings</h2>
+    <div class="row"><label for="vol-voices">Voices <output id="out-voices"></output></label>
+      <input id="vol-voices" type="range" min="0" max="100"></div>
+    <div class="row"><label for="vol-music">Background music <output id="out-music"></output></label>
+      <input id="vol-music" type="range" min="0" max="100"></div>
+    <div class="row"><label for="vol-sfx">Sound effects <output id="out-sfx"></output></label>
+      <input id="vol-sfx" type="range" min="0" max="100"></div>
+    <div class="row"><span class="label">Difficulty</span>
+      <div class="diff" role="group" aria-label="Difficulty">
+        <button data-diff="easy">Easy</button>
+        <button data-diff="medium">Medium</button>
+        <button data-diff="hard">Hard</button>
+      </div></div>
+    <button class="menu-btn" id="back">Back</button>
+  </section>
+
+  <div id="music-hint" hidden>Click anywhere to start the music</div>
+
+<script>
+/* =====================================================================
+   EDIT THIS BLOCK: point each value at your own file.
+   Leave a value as "" to skip it (text/gradient fallbacks are used).
+   Paths are relative to this HTML file.
+   ===================================================================== */
+const CONFIG = {
+  // Page title. If TITLE_IMAGE is set, the image is shown instead of the text.
+  TITLE_TEXT:  "Demon Queen RPG",
+  TITLE_IMAGE: "",                       // e.g. "images/title.png"
+
+  // Full-screen wallpaper behind the menu
+  WALLPAPER: "",                         // e.g. "images/menu_wallpaper.jpg"
+
+  // Looping music for the main menu
+  MUSIC: "",                             // e.g. "audio/menu_theme.mp3"
+
+  // Button pictures. All three images should be the same size.
+  //   default = idle, hover = mouse hover OR keyboard focus, pressed = while clicking
+  // width/height = size the button is shown at (CSS pixels)
+  BUTTONS: {
+    start:    { default: "", hover: "", pressed: "", width: 260, height: 70 },
+    settings: { default: "", hover: "", pressed: "", width: 260, height: 70 },
+    exit:     { default: "", hover: "", pressed: "", width: 260, height: 70 }
+  },
+  BACK_BUTTON: { default: "", hover: "", pressed: "", width: 200, height: 56 }
+};
+/* ===================================================================== */
+
+/* ---- Title ---- */
+const titleText = document.getElementById("title-text");
+const titleImg = document.getElementById("title-image");
+titleText.textContent = CONFIG.TITLE_TEXT;
+if (CONFIG.TITLE_IMAGE) {
+  titleImg.onload = () => { titleImg.style.display = "block"; titleText.style.display = "none"; };
+  titleImg.alt = CONFIG.TITLE_TEXT;
+  titleImg.src = CONFIG.TITLE_IMAGE;
+}
+
+/* ---- Wallpaper ---- */
+if (CONFIG.WALLPAPER) {
+  const probe = new Image();
+  probe.onload = () => { document.body.style.backgroundImage = `url("${CONFIG.WALLPAPER}")`; };
+  probe.src = CONFIG.WALLPAPER;
+}
+
+/* ---- Button images (falls back to styled text buttons if any image is missing) ---- */
+function applyButtonImages(btn, cfg) {
+  if (!cfg || !cfg.default) return;
+  const urls = [cfg.default, cfg.hover || cfg.default, cfg.pressed || cfg.default];
+  let loaded = 0, failed = false;
+  urls.forEach(u => {
+    const im = new Image();
+    im.onload = () => {
+      if (++loaded === urls.length && !failed) {
+        btn.style.setProperty("--img-default", `url("${urls[0]}")`);
+        btn.style.setProperty("--img-hover", `url("${urls[1]}")`);
+        btn.style.setProperty("--img-pressed", `url("${urls[2]}")`);
+        btn.style.setProperty("--w", (cfg.width || 260) + "px");
+        btn.style.setProperty("--h", (cfg.height || 70) + "px");
+        btn.classList.add("has-img");
+      }
+    };
+    im.onerror = () => { failed = true; };
+    im.src = u;
+  });
+}
+document.querySelectorAll("#menu .menu-btn").forEach(b => applyButtonImages(b, CONFIG.BUTTONS[b.dataset.key]));
+applyButtonImages(document.getElementById("back"), CONFIG.BACK_BUTTON);
+
+/* ---- Settings (saved in the visitor's browser) ---- */
+const settings = { voices: 80, music: 60, sfx: 80, difficulty: "medium" };
+try { Object.assign(settings, JSON.parse(localStorage.getItem("dqrpg-settings")) || {}); } catch (e) {}
+window.gameSettings = settings;   // your game can read this later
+
+const music = new Audio();
+music.loop = true;
+if (CONFIG.MUSIC) music.src = CONFIG.MUSIC;
+
+function saveSettings() {
+  try { localStorage.setItem("dqrpg-settings", JSON.stringify(settings)); } catch (e) {}
+}
+function applyMusicVolume() { music.volume = settings.music / 100; }
+
+["voices", "music", "sfx"].forEach(k => {
+  const slider = document.getElementById("vol-" + k);
+  const out = document.getElementById("out-" + k);
+  slider.value = settings[k];
+  out.textContent = settings[k] + "%";
+  slider.addEventListener("input", () => {
+    settings[k] = Number(slider.value);
+    out.textContent = settings[k] + "%";
+    if (k === "music") applyMusicVolume();
+    saveSettings();
+  });
+});
+applyMusicVolume();
+
+const diffBtns = document.querySelectorAll(".diff button");
+function showDifficulty() {
+  diffBtns.forEach(b => b.setAttribute("aria-pressed", b.dataset.diff === settings.difficulty));
+}
+diffBtns.forEach(b => b.addEventListener("click", () => {
+  settings.difficulty = b.dataset.diff; showDifficulty(); saveSettings();
+}));
+showDifficulty();
+
+/* ---- Menu navigation ---- */
+const menu = document.getElementById("menu");
+const panel = document.getElementById("settings");
+function openSettings(open) {
+  menu.hidden = open; panel.hidden = !open;
+  (open ? panel.querySelector("input") : menu.querySelector('[data-key="settings"]')).focus();
+}
+menu.querySelector('[data-key="settings"]').addEventListener("click", () => openSettings(true));
+document.getElementById("back").addEventListener("click", () => openSettings(false));
+
+/* Start and Exit are placeholders for now. Hook your game in here later. */
+menu.querySelector('[data-key="start"]').addEventListener("click", () => { /* TODO: start game */ });
+menu.querySelector('[data-key="exit"]').addEventListener("click", () => { /* TODO: exit */ });
+
+/* ---- Music: browsers only allow audio after the visitor interacts with the page ---- */
+if (CONFIG.MUSIC) {
+  const hint = document.getElementById("music-hint");
+  const begin = () => {
+    music.play().then(() => { hint.hidden = true; }).catch(() => {});
+    removeEventListener("pointerdown", begin);
+    removeEventListener("keydown", begin);
+  };
+  music.play().catch(() => { hint.hidden = false; });
+  addEventListener("pointerdown", begin);
+  addEventListener("keydown", begin);
+}
+</script>
+</body>
+</html>
